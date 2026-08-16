@@ -1,0 +1,154 @@
+/**
+ * デザイントークン運用ガイド（案件複製時はここを起点に変更する）
+ *
+ * - 背景色 / メイン文字色 / サブ文字色 / アクセントカラー / ボーダー色
+ *     → このファイル内の :root ブロック（下記 BRAND COLORS）
+ * - ボタン（CTA）の色
+ *     → :root の --accent / --accent-foreground（形状・余白は components/cta-button.tsx）
+ * - フォント
+ *     → app/layout.tsx のフォント読み込み設定 + このファイルの --font-sans / --font-display
+ * - 見出しサイズ / 本文サイズ
+ *     → 各 components/*.tsx 内の text-4xl, text-5xl, text-base 等のクラス（セクションごとに指定）
+ * - セクション余白
+ *     → 各 components/*.tsx コンテナの px-5 py-24 md:px-8 md:py-36（全セクション共通パターン）
+ * - 角丸
+ *     → このファイルの --radius-sm / --radius-md / --radius-lg
+ * - シャドウ
+ *     → 現状未使用（フラット/エディトリアルなデザイン）。使う場合は各コンポーネントに shadow-* クラスを追加
+ * - 写真の見せ方
+ *     → 各 components/*.tsx の <Image> 周りのclassName（object-cover, aspect-* など）
+ * - Heroの高さ・レイアウト
+ *     → components/hero.tsx
+ * - CTAの見た目
+ *     → components/cta-button.tsx
+ */
+
+@import 'tailwindcss';
+@import 'tw-animate-css';
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  /* Tailwindユーティリティ（bg-background 等）と下記 :root のCSS変数を紐づけるマッピング。
+     値そのものは :root 側で管理するため、このブロックは通常変更不要。 */
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-surface: var(--surface);
+  --color-surface-foreground: var(--surface-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-border: var(--border);
+  --color-ring: var(--ring);
+
+  /* ===== フォント ===== */
+  /* 実際のフォント読み込みは app/layout.tsx。ここは font-sans / font-display クラスへのマッピング。 */
+  --font-sans: var(--font-body), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-heading), 'Arial Narrow', sans-serif;
+
+  /* ===== 角丸 ===== */
+  /* 案件のデザイン仕様に合わせて変更（トークン自体は控えめだが、各コンポーネント側で柔らかい丸みを付けている） */
+  --radius-sm: 2px;
+  --radius-md: 4px;
+  --radius-lg: 6px;
+}
+
+/* ===== BRAND COLORS ===== */
+/* 案件ごとにChatGPTのデザイン仕様に合わせて変更 */
+:root {
+  color-scheme: light;
+
+  /* 背景色 / あたたかいアイボリー（オンラインピラティスのブランドカラー） */
+  --background: #f7f3ed;
+  /* メイン文字色 */
+  --foreground: #292827;
+
+  /* サブ背景（セクションの帯など、背景より一段明るい面） */
+  --surface: #efe9e4;
+  --surface-foreground: #292827;
+
+  /* サブ文字色 / ミュートな面の背景 */
+  --muted: #e8e1dc;
+  --muted-foreground: #77716f;
+
+  /* アクセントカラー（CTA・強調に使用。多用しない） */
+  --accent: #a97882;
+  --accent-foreground: #ffffff;
+
+  /* ボーダー色 / フォーカスリング色 */
+  --border: rgba(41, 40, 39, 0.12);
+  --ring: #a97882;
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  html {
+    @apply bg-background;
+    scroll-behavior: smooth;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-feature-settings: 'palt' 1;
+  }
+  ::selection {
+    background: var(--accent);
+    color: var(--accent-foreground);
+  }
+  :focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
+  }
+}
+
+@layer utilities {
+  /* Vertical Japanese writing */
+  .writing-vertical {
+    writing-mode: vertical-rl;
+    text-orientation: upright;
+  }
+
+  /* 写真の見せ方 / スクロール時のフェード・リビール演出（components/reveal.tsx が付与） */
+  .reveal {
+    opacity: 0;
+    transform: translateY(24px);
+    transition:
+      opacity 1s cubic-bezier(0.16, 1, 0.3, 1),
+      transform 1s cubic-bezier(0.16, 1, 0.3, 1);
+    will-change: opacity, transform;
+  }
+  .reveal.is-visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .hide-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .hide-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  .reveal {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
